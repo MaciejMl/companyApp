@@ -43,7 +43,7 @@ router.post('/departments', async (req, res) => {
     const { name } = req.body;
     const newDepartment = new Department({ name: name });
     await newDepartment.save();
-    res.json({ message: 'OK' });
+    res.json({ message: 'OK', department: newDepartment });
   } catch (err) {
     res.status(500).json({ message: err });
   }
@@ -59,7 +59,8 @@ router.put('/departments/:id', async (req, res) => {
         { _id: req.params.id },
         { $set: { name: name } }
       );
-      res.json({ message: 'OK' });
+      const updatedDepartment = await Department.findById(req.params.id);
+      res.json({ message: 'OK', department: updatedDepartment });
     } else {
       res.status(404).json({ message: 'Not found...' });
     }
@@ -72,8 +73,10 @@ router.delete('/departments/:id', async (req, res) => {
   try {
     const dep = await Department.findById(req.params.id);
     if (dep) {
-      await Department.deleteOne({ _id: req.params.id });
-      res.json({ message: 'OK' });
+      const deletedDepartment = await Department.findOneAndDelete({
+        _id: req.params.id,
+      });
+      res.json({ message: 'OK', department: deletedDepartment });
     } else res.status(404).json({ message: 'Not found...' });
   } catch (err) {
     res.status(500).json({ message: err });
